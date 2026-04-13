@@ -1,0 +1,89 @@
+﻿{
+  "realm": "financetracker",
+  "enabled": true,
+  "displayName": "FinanceTracker",
+  "registrationAllowed": true,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  "roles": {
+    "realm": [
+      { "name": "user" },
+      { "name": "premium" }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "financetracker-api",
+      "name": "FinanceTracker API",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "bearerOnly": false,
+      "serviceAccountsEnabled": true,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "secret": "financetracker-api-secret",
+      "fullScopeAllowed": true
+    },
+    {
+      "clientId": "financetracker-web",
+      "name": "FinanceTracker Web",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "implicitFlowEnabled": false,
+      "secret": "financetracker-web-secret",
+      "redirectUris": [
+        "http://localhost:3000/*",
+        "http://localhost:5173/*",
+        "http://localhost:8081/swagger/oauth2-redirect.html"
+      ],
+      "webOrigins": [
+        "http://localhost:3000",
+        "http://localhost:5173",
+        "http://localhost:8081"
+      ],
+      "defaultClientScopes": [
+        "profile",
+        "email",
+        "roles"
+      ],
+      "protocolMappers": [
+        {
+          "name": "aud-financetracker-api",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "access.token.claim": "true",
+            "id.token.claim": "false",
+            "included.client.audience": "financetracker-api"
+          }
+        }
+      ]
+    }
+  ],
+  "users": [
+    {
+      "username": "demo",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Demo",
+      "lastName": "User",
+      "email": "demo@local.test",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo123!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "user"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,60 @@
+﻿services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: financetracker-postgres
+    environment:
+      POSTGRES_DB: financetracker
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d financetracker"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  keycloak:
+    build:
+      context: .
+      dockerfile: docker/keycloak/Dockerfile
+    container_name: financetracker-keycloak
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: financetracker-api
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      Authentication__UseDevelopmentAuth: "false"
+      Persistence__UseInMemory: "false"
+      ConnectionStrings__Postgres: "Host=postgres;Port=5432;Database=financetracker;Username=postgres;Password=postgres"
+      Keycloak__BaseUrl: "http://keycloak:8080"
+      Keycloak__Realm: "financetracker"
+      Keycloak__ClientId: "financetracker-web"
+      Keycloak__ClientSecret: "financetracker-web-secret"
+      Keycloak__AdminClientId: "admin-cli"
+      Keycloak__AdminUsername: "admin"
+      Keycloak__AdminPassword: "admin"
+      Keycloak__RequireHttpsMetadata: "false"
+    ports:
+      - "8081:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      keycloak:
+        condition: service_started
+
+volumes:
+  postgres_data:
