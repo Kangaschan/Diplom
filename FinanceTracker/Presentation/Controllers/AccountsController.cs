@@ -7,6 +7,7 @@ namespace Presentation.Controllers;
 
 public sealed record CreateAccountRequest(string Name, string CurrencyCode, decimal InitialBalance);
 public sealed record UpdateAccountRequest(string Name, bool IsArchived, decimal? FinancialGoalAmount, DateTime? FinancialGoalDeadline);
+public sealed record SetBalanceRequest(decimal NewBalance);
 public sealed record TransferRequest(Guid FromAccountId, Guid ToAccountId, decimal Amount, string CurrencyCode, string? Description);
 
 [ApiController]
@@ -46,6 +47,13 @@ public sealed class AccountsController(AccountService accountService) : Controll
     public async Task<IActionResult> Archive(Guid id, CancellationToken ct)
     {
         var result = await accountService.ArchiveAsync(id, ct);
+        return this.ToActionResult(result);
+    }
+
+    [HttpPatch("{id:guid}/balance")]
+    public async Task<IActionResult> SetBalance(Guid id, [FromBody] SetBalanceRequest request, CancellationToken ct)
+    {
+        var result = await accountService.SetBalanceAsync(id, request.NewBalance, ct);
         return this.ToActionResult(result);
     }
 

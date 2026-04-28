@@ -1,4 +1,4 @@
-﻿using Application.Abstractions;
+using Application.Abstractions;
 using Application.Auth;
 using Domain.Accounts;
 using Domain.Common;
@@ -7,7 +7,10 @@ using Shared.Results;
 
 namespace Application.Accounts;
 
-public sealed class AccountService(IFinanceDbContext dbContext, IAuthService authService)
+public sealed class AccountService(
+    IFinanceDbContext dbContext,
+    IAuthService authService,
+    ICurrencyRateProvider currencyRateProvider)
 {
     public async Task<Result<IReadOnlyCollection<Account>>> GetListAsync(bool includeArchived = false, CancellationToken ct = default)
     {
@@ -71,6 +74,23 @@ public sealed class AccountService(IFinanceDbContext dbContext, IAuthService aut
         return Result<Account>.Success(account);
     }
 
+    public async Task<Result<Account>> SetBalanceAsync(Guid id, decimal newBalance, CancellationToken ct = default)
+    {
+        if (newBalance < 0)
+        {
+            return Result<Account>.Failure(AppErrors.Validation("Balance cannot be negative."));
+        }
+
+        var accountResult = await GetByIdAsync(id, ct);
+        if (accountResult.IsFailure || accountResult.Value is null) return Result<Account>.Failure(accountResult.Error);
+
+        accountResult.Value.CurrentBalance = decimal.Round(newBalance, 2, MidpointRounding.AwayFromZero);
+        accountResult.Value.UpdatedAt = DateTime.UtcNow;
+
+        await dbContext.SaveChangesAsync(ct);
+        return Result<Account>.Success(accountResult.Value);
+    }
+
     public async Task<Result> ArchiveAsync(Guid id, CancellationToken ct = default)
     {
         var accountResult = await GetByIdAsync(id, ct);
@@ -101,11 +121,30 @@ public sealed class AccountService(IFinanceDbContext dbContext, IAuthService aut
             return Result<Transfer>.Failure(AppErrors.Validation("Insufficient funds."));
         }
 
+        var sourceCurrency = from.CurrencyCode.Trim().ToUpperInvariant();
+        var targetCurrency = to.CurrencyCode.Trim().ToUpperInvariant();
+        var transferCurrency = string.IsNullOrWhiteSpace(currencyCode)
+            ? sourceCurrency
+            : currencyCode.Trim().ToUpperInvariant();
+
+        if (transferCurrency != sourceCurrency)
+        {
+            return Result<Transfer>.Failure(AppErrors.Validation($"Transfer currency must match source account currency '{sourceCurrency}'."));
+        }
+
+        var convertedAmountResult = await currencyRateProvider.ConvertAsync(amount, sourceCurrency, targetCurrency, ct);
+        if (convertedAmountResult.IsFailure)
+        {
+            return Result<Transfer>.Failure(convertedAmountResult.Error);
+        }
+
+        var convertedAmount = convertedAmountResult.Value;
         var now = DateTime.UtcNow;
 
-        from.CurrentBalance -= amount;
+        from.CurrentBalance = decimal.Round(from.CurrentBalance - amount, 2, MidpointRounding.AwayFromZero);
         from.UpdatedAt = now;
-        to.CurrentBalance += amount;
+
+        to.CurrentBalance = decimal.Round(to.CurrentBalance + convertedAmount, 2, MidpointRounding.AwayFromZero);
         to.UpdatedAt = now;
 
         var outgoing = new Transaction
@@ -114,7 +153,7 @@ public sealed class AccountService(IFinanceDbContext dbContext, IAuthService aut
             AccountId = from.Id,
             Type = TransactionType.Transfer,
             Amount = amount,
-            CurrencyCode = currencyCode,
+            CurrencyCode = sourceCurrency,
             TransactionDate = now,
             Description = description,
             Source = TransactionSource.Transfer,
@@ -128,8 +167,8 @@ public sealed class AccountService(IFinanceDbContext dbContext, IAuthService aut
             UserId = to.UserId,
             AccountId = to.Id,
             Type = TransactionType.Transfer,
-            Amount = amount,
-            CurrencyCode = currencyCode,
+            Amount = convertedAmount,
+            CurrencyCode = targetCurrency,
             TransactionDate = now,
             Description = description,
             Source = TransactionSource.Transfer,
@@ -147,7 +186,7 @@ public sealed class AccountService(IFinanceDbContext dbContext, IAuthService aut
             FromAccountId = from.Id,
             ToAccountId = to.Id,
             Amount = amount,
-            CurrencyCode = currencyCode,
+            CurrencyCode = sourceCurrency,
             TransferDate = now,
             Description = description,
             OutgoingTransactionId = outgoing.Id,

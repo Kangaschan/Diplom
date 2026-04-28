@@ -79,3 +79,29 @@ appsettings.Local.json
 
 # Docker local overrides
 docker-compose.override.yml
+
+# ------------------------------
+# Frontend (React + TypeScript)
+# ------------------------------
+FinanceTracker/frontend/node_modules/
+FinanceTracker/frontend/dist/
+FinanceTracker/frontend/build/
+FinanceTracker/frontend/.vite/
+FinanceTracker/frontend/.cache/
+
+# env файлы фронта
+FinanceTracker/frontend/.env
+FinanceTracker/frontend/.env.*
+!FinanceTracker/frontend/.env.example
+
+# логи фронта
+FinanceTracker/frontend/npm-debug.log*
+FinanceTracker/frontend/yarn-debug.log*
+FinanceTracker/frontend/yarn-error.log*
+
+# IDE специфичное (если вдруг внутри фронта)
+FinanceTracker/frontend/.idea/
+FinanceTracker/frontend/.vscode/
+
+# TypeScript cache
+FinanceTracker/frontend/*.tsbuildinfo
