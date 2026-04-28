@@ -23,7 +23,7 @@ export interface CreateTransactionRequest {
 
 export const transactionsApi = api.injectEndpoints({
   endpoints: (builder) => ({
-    getTransactions: builder.query<TransactionDto[], TransactionsQuery | void>({
+    getTransactions: builder.query<TransactionDto[], TransactionsQuery | undefined >({
       query: (params) => ({
         url: "/transactions",
         params
