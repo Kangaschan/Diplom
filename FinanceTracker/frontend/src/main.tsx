@@ -29,6 +29,10 @@ function Root() {
     }
   }, [i18n, language]);
 
+  useEffect(() => {
+    document.body.dataset.theme = themeMode;
+  }, [themeMode]);
+
   return (
     <ConfigProvider theme={buildAntdTheme(themeMode)}>
       <BrowserRouter>

@@ -89,6 +89,9 @@ FinanceTracker/frontend/build/
 FinanceTracker/frontend/.vite/
 FinanceTracker/frontend/.cache/
 
+# api keys
+FinanceTracker/Presentation/appsettings.Development.json
+
 # env файлы фронта
 FinanceTracker/frontend/.env
 FinanceTracker/frontend/.env.*

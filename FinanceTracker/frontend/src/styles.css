@@ -14,6 +14,16 @@ body {
   min-height: 100vh;
 }
 
+body[data-theme="light"] {
+  background: #f4e9d4;
+  color: #000000;
+}
+
+body[data-theme="dark"] {
+  background: #042d22;
+  color: #e6ff55;
+}
+
 .page-content {
   display: grid;
   gap: 16px;
@@ -54,4 +64,52 @@ body {
 .ant-layout-sider-light .ft-sidebar-menu .ant-menu-submenu-selected > .ant-menu-submenu-title,
 .ant-layout-sider-light .ft-sidebar-menu .ant-menu-item-selected .anticon {
   color: #ffffff !important;
+}
+
+.ft-current-plan-badge {
+  margin-inline-start: 0 !important;
+  border: 1px solid #326586 !important;
+  background: #326586 !important;
+  color: #ffffff !important;
+}
+
+body[data-theme="dark"] .ft-current-plan-badge {
+  background: #e6ff55 !important;
+  color: #000000 !important;
+  border-color: #e6ff55 !important;
+}
+
+body[data-theme="dark"] .ant-card,
+body[data-theme="dark"] .ant-drawer-content,
+body[data-theme="dark"] .ant-drawer-header {
+  box-shadow: none !important;
+}
+
+body[data-theme="dark"] .ant-typography,
+body[data-theme="dark"] .ant-card-head-title,
+body[data-theme="dark"] .ant-drawer-title {
+  color: #e6ff55 !important;
+}
+
+body[data-theme="dark"] .ant-typography.ant-typography-secondary,
+body[data-theme="dark"] .ant-drawer .ant-typography-secondary {
+  color: #9fd6b8 !important;
+}
+
+body[data-theme="dark"] .ant-btn-default {
+  background: #0a3a2d !important;
+  color: #e6ff55 !important;
+  border-color: #13ae87 !important;
+}
+
+body[data-theme="dark"] .ant-btn-default:hover,
+body[data-theme="dark"] .ant-btn-default:focus {
+  background: #0f5d48 !important;
+  color: #e6ff55 !important;
+  border-color: #e6ff55 !important;
+}
+
+body[data-theme="dark"] .ant-badge-count {
+  background: #13ae87 !important;
+  color: #042d22 !important;
 }

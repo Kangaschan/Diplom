@@ -10,6 +10,7 @@ using Persistence.Db;
 using Presentation.Authorization;
 using Presentation.Middleware;
 using Services;
+using Subscriptions;
 
 var builder = WebApplication.CreateBuilder(args);
 const string FrontendCorsPolicy = "FrontendCorsPolicy";
@@ -17,6 +18,7 @@ const string FrontendCorsPolicy = "FrontendCorsPolicy";
 builder.Services.AddApplication();
 builder.Services.AddPersistence(builder.Configuration);
 builder.Services.AddExternalServices(builder.Configuration);
+builder.Services.AddStripeSubscriptions(builder.Configuration);
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUserAccessor, CurrentUserAccessor>();
 
