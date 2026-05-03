@@ -22,6 +22,7 @@ public static class DependencyInjection
 
         services.AddSingleton<CurrencyRateCacheService>();
         services.AddSingleton<ICurrencyRateProvider>(provider => provider.GetRequiredService<CurrencyRateCacheService>());
+        services.AddSingleton<IDashboardCurrencyProvider, DashboardCurrencyProvider>();
         services.AddHostedService(provider => provider.GetRequiredService<CurrencyRateCacheService>());
 
         return services;

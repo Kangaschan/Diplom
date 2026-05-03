@@ -8,7 +8,7 @@ namespace Presentation.Controllers;
 public sealed record CreateAccountRequest(string Name, string CurrencyCode, decimal InitialBalance);
 public sealed record UpdateAccountRequest(string Name, bool IsArchived, decimal? FinancialGoalAmount, DateTime? FinancialGoalDeadline);
 public sealed record SetBalanceRequest(decimal NewBalance);
-public sealed record TransferRequest(Guid FromAccountId, Guid ToAccountId, decimal Amount, string CurrencyCode, string? Description);
+public sealed record TransferRequest(Guid FromAccountId, Guid ToAccountId, decimal Amount, string CurrencyCode, decimal? ManualRate, string? Description);
 
 [ApiController]
 [Route("api/accounts")]
@@ -60,7 +60,14 @@ public sealed class AccountsController(AccountService accountService) : Controll
     [HttpPost("transfer")]
     public async Task<IActionResult> Transfer([FromBody] TransferRequest request, CancellationToken ct)
     {
-        var result = await accountService.TransferAsync(request.FromAccountId, request.ToAccountId, request.Amount, request.CurrencyCode, request.Description, ct);
+        var result = await accountService.TransferAsync(
+            request.FromAccountId,
+            request.ToAccountId,
+            request.Amount,
+            request.CurrencyCode,
+            request.ManualRate,
+            request.Description,
+            ct);
         return this.ToActionResult(result);
     }
 }

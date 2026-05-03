@@ -1,4 +1,4 @@
-﻿import { Alert, Button, Card, Col, Form, Input, InputNumber, Row, Select, Space, Typography, message } from "antd";
+import { Alert, Button, Card, Col, Form, Input, InputNumber, Row, Select, Space, Typography, message } from "antd";
 import { useEffect, useMemo, useState } from "react";
 
 import { useGetAccountsQuery, useTransferMutation } from "../../features/accounts/accountsApi";
@@ -11,6 +11,7 @@ interface TransferForm {
   fromAccountId: string;
   toAccountId: string;
   amount: number;
+  manualRate?: number;
   description?: string;
 }
 
@@ -25,8 +26,8 @@ export function TransferPage() {
 
   const values = Form.useWatch([], form) as TransferForm | undefined;
 
-  const from = useMemo(() => accounts.find((a) => a.id === values?.fromAccountId), [accounts, values?.fromAccountId]);
-  const to = useMemo(() => accounts.find((a) => a.id === values?.toAccountId), [accounts, values?.toAccountId]);
+  const from = useMemo(() => accounts.find((account) => account.id === values?.fromAccountId), [accounts, values?.fromAccountId]);
+  const to = useMemo(() => accounts.find((account) => account.id === values?.toAccountId), [accounts, values?.toAccountId]);
 
   useEffect(() => {
     let active = true;
@@ -58,19 +59,36 @@ export function TransferPage() {
     }
 
     void loadRate();
+
     return () => {
       active = false;
     };
   }, [from, to]);
 
-  const estimatedReceive = useMemo(() => {
-    const amount = values?.amount ?? 0;
-    if (!rate) {
+  const effectiveRate = useMemo(() => {
+    if (!from || !to) {
       return null;
     }
 
-    return Number((amount * rate).toFixed(2));
-  }, [values?.amount, rate]);
+    if (from.currencyCode === to.currencyCode) {
+      return 1;
+    }
+
+    if (values?.manualRate && values.manualRate > 0) {
+      return values.manualRate;
+    }
+
+    return rate;
+  }, [from, to, rate, values?.manualRate]);
+
+  const estimatedReceive = useMemo(() => {
+    const amount = values?.amount ?? 0;
+    if (!effectiveRate) {
+      return null;
+    }
+
+    return Number((amount * effectiveRate).toFixed(2));
+  }, [values?.amount, effectiveRate]);
 
   async function onFinish(data: TransferForm) {
     if (!from || !to) {
@@ -82,6 +100,7 @@ export function TransferPage() {
       toAccountId: data.toAccountId,
       amount: data.amount,
       currencyCode: from.currencyCode,
+      manualRate: data.manualRate && data.manualRate > 0 ? data.manualRate : null,
       description: data.description
     };
 
@@ -96,7 +115,8 @@ export function TransferPage() {
       amountReceived: estimatedReceive ?? data.amount,
       sourceCurrency: from.currencyCode,
       targetCurrency: to.currencyCode,
-      estimatedRate: rate,
+      estimatedRate: effectiveRate,
+      manualRate: body.manualRate,
       description: data.description
     });
 
@@ -105,7 +125,7 @@ export function TransferPage() {
       screen: "transfer",
       details: {
         ...body,
-        estimatedRate: rate,
+        effectiveRate,
         estimatedReceive
       }
     });
@@ -128,24 +148,43 @@ export function TransferPage() {
             <Form form={form} layout="vertical" onFinish={(data) => void onFinish(data)}>
               <Form.Item name="fromAccountId" label="From account" rules={[{ required: true }]}>
                 <Select
-                  options={accounts.map((acc) => ({
-                    label: `${acc.name} (${acc.currencyCode}) — ${formatMoney(acc.currentBalance, acc.currencyCode)}`,
-                    value: acc.id
+                  options={accounts.map((account) => ({
+                    label: `${account.name} (${account.currencyCode}) - ${formatMoney(account.currentBalance, account.currencyCode)}`,
+                    value: account.id
                   }))}
                 />
               </Form.Item>
 
               <Form.Item name="toAccountId" label="To account" rules={[{ required: true }]}>
                 <Select
-                  options={accounts.map((acc) => ({
-                    label: `${acc.name} (${acc.currencyCode}) — ${formatMoney(acc.currentBalance, acc.currencyCode)}`,
-                    value: acc.id
+                  options={accounts.map((account) => ({
+                    label: `${account.name} (${account.currencyCode}) - ${formatMoney(account.currentBalance, account.currencyCode)}`,
+                    value: account.id
                   }))}
                 />
               </Form.Item>
 
               <Form.Item name="amount" label="Amount" rules={[{ required: true }]}>
                 <InputNumber style={{ width: "100%" }} min={0.01} precision={2} />
+              </Form.Item>
+
+              <Form.Item
+                name="manualRate"
+                label="Manual exchange rate"
+                extra="Optional. Leave empty to use the current exchange rate automatically."
+                rules={[
+                  {
+                    validator(_, value: number | undefined) {
+                      if (value === undefined || value === null || value > 0) {
+                        return Promise.resolve();
+                      }
+
+                      return Promise.reject(new Error("Manual rate must be greater than zero"));
+                    }
+                  }
+                ]}
+              >
+                <InputNumber style={{ width: "100%" }} min={0.000001} precision={6} placeholder="For example: 4" />
               </Form.Item>
 
               <Form.Item name="description" label="Description">
@@ -164,11 +203,22 @@ export function TransferPage() {
             <Space direction="vertical" style={{ width: "100%" }}>
               <Typography.Text>Source currency: {from?.currencyCode ?? "-"}</Typography.Text>
               <Typography.Text>Target currency: {to?.currencyCode ?? "-"}</Typography.Text>
-              <Typography.Text>Estimated rate: {rateLoading ? "Loading..." : rate ?? "n/a"}</Typography.Text>
+              <Typography.Text>
+                Auto rate: {rateLoading ? "Loading..." : rate ?? "n/a"}
+              </Typography.Text>
+              <Typography.Text>
+                Applied rate: {effectiveRate ?? "n/a"}
+              </Typography.Text>
+              <Typography.Text type="secondary">
+                {values?.manualRate && values.manualRate > 0
+                  ? "Manual rate is enabled for this transfer."
+                  : "Current exchange rate will be used automatically."}
+              </Typography.Text>
               <Typography.Text strong>
                 Estimated receive amount: {estimatedReceive === null || !to ? "n/a" : formatMoney(estimatedReceive, to.currencyCode)}
               </Typography.Text>
-              {!rate && from && to && (
+
+              {!rate && from && to && !values?.manualRate && (
                 <Alert
                   type="warning"
                   showIcon

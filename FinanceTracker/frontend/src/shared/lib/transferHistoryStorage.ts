@@ -1,4 +1,4 @@
-﻿export interface TransferHistoryEntry {
+export interface TransferHistoryEntry {
   id: string;
   createdAt: string;
   fromAccountName: string;
@@ -8,6 +8,7 @@
   sourceCurrency: string;
   targetCurrency: string;
   estimatedRate: number | null;
+  manualRate?: number | null;
   description?: string;
 }
 

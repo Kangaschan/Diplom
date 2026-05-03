@@ -102,10 +102,18 @@ public sealed class AccountService(
         return Result.Success();
     }
 
-    public async Task<Result<Transfer>> TransferAsync(Guid fromAccountId, Guid toAccountId, decimal amount, string currencyCode, string? description, CancellationToken ct = default)
+    public async Task<Result<Transfer>> TransferAsync(
+        Guid fromAccountId,
+        Guid toAccountId,
+        decimal amount,
+        string currencyCode,
+        decimal? manualRate,
+        string? description,
+        CancellationToken ct = default)
     {
         if (amount <= 0) return Result<Transfer>.Failure(AppErrors.Validation("Amount must be positive."));
         if (fromAccountId == toAccountId) return Result<Transfer>.Failure(AppErrors.Validation("Accounts must be different."));
+        if (manualRate is <= 0) return Result<Transfer>.Failure(AppErrors.Validation("Manual rate must be positive."));
 
         var fromResult = await GetByIdAsync(fromAccountId, ct);
         if (fromResult.IsFailure || fromResult.Value is null) return Result<Transfer>.Failure(fromResult.Error);
@@ -132,13 +140,27 @@ public sealed class AccountService(
             return Result<Transfer>.Failure(AppErrors.Validation($"Transfer currency must match source account currency '{sourceCurrency}'."));
         }
 
-        var convertedAmountResult = await currencyRateProvider.ConvertAsync(amount, sourceCurrency, targetCurrency, ct);
-        if (convertedAmountResult.IsFailure)
+        decimal convertedAmount;
+
+        if (sourceCurrency == targetCurrency)
         {
-            return Result<Transfer>.Failure(convertedAmountResult.Error);
+            convertedAmount = decimal.Round(amount, 2, MidpointRounding.AwayFromZero);
+        }
+        else if (manualRate.HasValue)
+        {
+            convertedAmount = decimal.Round(amount * manualRate.Value, 2, MidpointRounding.AwayFromZero);
+        }
+        else
+        {
+            var convertedAmountResult = await currencyRateProvider.ConvertAsync(amount, sourceCurrency, targetCurrency, ct);
+            if (convertedAmountResult.IsFailure)
+            {
+                return Result<Transfer>.Failure(convertedAmountResult.Error);
+            }
+
+            convertedAmount = convertedAmountResult.Value;
         }
 
-        var convertedAmount = convertedAmountResult.Value;
         var now = DateTime.UtcNow;
 
         from.CurrentBalance = decimal.Round(from.CurrentBalance - amount, 2, MidpointRounding.AwayFromZero);

@@ -2,7 +2,6 @@ import { Button, Card, Col, Progress, Row, Skeleton, Space, Statistic, Typograph
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 
-import { useGetAccountsQuery } from "../../features/accounts/accountsApi";
 import { useGetDashboardAnalyticsQuery } from "../../features/analytics/analyticsApi";
 import { formatMoney } from "../../shared/lib/formatMoney";
 
@@ -10,10 +9,7 @@ export function DashboardPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  const { data: accounts = [], isLoading: accountsLoading } = useGetAccountsQuery({ includeArchived: false });
   const { data: dashboard, isLoading: dashboardLoading } = useGetDashboardAnalyticsQuery();
-
-  const totalBalance = accounts.reduce((sum, acc) => sum + acc.currentBalance, 0);
 
   return (
     <div className="page-content">
@@ -32,14 +28,34 @@ export function DashboardPage() {
         </Space>
       </Card>
 
-      {accountsLoading || dashboardLoading ? (
+      {dashboardLoading ? (
         <Skeleton active paragraph={{ rows: 6 }} />
       ) : (
         <div className="stat-grid">
-          <Card><Statistic title="Total balance" value={formatMoney(totalBalance)} /></Card>
-          <Card><Statistic title="Income (period)" value={formatMoney(dashboard?.totalIncome ?? 0)} /></Card>
-          <Card><Statistic title="Expenses (period)" value={formatMoney(dashboard?.totalExpense ?? 0)} /></Card>
-          <Card><Statistic title="Net result" value={formatMoney(dashboard?.net ?? 0)} /></Card>
+          <Card>
+            <Statistic
+              title="Total balance"
+              value={formatMoney(dashboard?.totalBalance ?? 0, dashboard?.currencyCode ?? "USD")}
+            />
+          </Card>
+          <Card>
+            <Statistic
+              title="Income (period)"
+              value={formatMoney(dashboard?.totalIncome ?? 0, dashboard?.currencyCode ?? "USD")}
+            />
+          </Card>
+          <Card>
+            <Statistic
+              title="Expenses (period)"
+              value={formatMoney(dashboard?.totalExpense ?? 0, dashboard?.currencyCode ?? "USD")}
+            />
+          </Card>
+          <Card>
+            <Statistic
+              title="Net result"
+              value={formatMoney(dashboard?.net ?? 0, dashboard?.currencyCode ?? "USD")}
+            />
+          </Card>
         </div>
       )}
 

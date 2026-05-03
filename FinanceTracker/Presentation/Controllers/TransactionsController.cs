@@ -12,11 +12,19 @@ public sealed record CreateTransactionRequest(
     TransactionType Type,
     decimal Amount,
     string CurrencyCode,
+    decimal? ManualRate,
     DateTime TransactionDate,
     string? Description,
     TransactionSource Source = TransactionSource.Manual);
 
-public sealed record UpdateTransactionRequest(Guid AccountId, Guid? CategoryId, decimal Amount, DateTime TransactionDate, string? Description);
+public sealed record UpdateTransactionRequest(
+    Guid AccountId,
+    Guid? CategoryId,
+    decimal Amount,
+    string CurrencyCode,
+    decimal? ManualRate,
+    DateTime TransactionDate,
+    string? Description);
 
 [ApiController]
 [Route("api/transactions")]
@@ -46,6 +54,7 @@ public sealed class TransactionsController(TransactionService transactionService
             request.Type,
             request.Amount,
             request.CurrencyCode,
+            request.ManualRate,
             request.TransactionDate,
             request.Description,
             request.Source,
@@ -61,6 +70,8 @@ public sealed class TransactionsController(TransactionService transactionService
             request.AccountId,
             request.CategoryId,
             request.Amount,
+            request.CurrencyCode,
+            request.ManualRate,
             request.Description,
             request.TransactionDate,
             ct);

@@ -68,7 +68,15 @@ export interface ProfileDto {
 }
 
 export interface DashboardDto {
+  totalBalance?: number;
   totalIncome?: number;
   totalExpense?: number;
   net?: number;
+  currencyCode?: string;
+}
+
+export enum BudgetPeriodType {
+  Monthly = 1,
+  Weekly = 2,
+  Custom = 3
 }

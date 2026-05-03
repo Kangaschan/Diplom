@@ -23,6 +23,7 @@ export interface TransferRequest {
   toAccountId: string;
   amount: number;
   currencyCode: string;
+  manualRate?: number | null;
   description?: string;
 }
 

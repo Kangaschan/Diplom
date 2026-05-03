@@ -6,14 +6,16 @@ using Shared.Results;
 
 namespace Application.Analytics;
 
-public sealed record DashboardAnalyticsDto(decimal TotalIncome, decimal TotalExpense, decimal Net, int TransactionsCount);
+public sealed record DashboardAnalyticsDto(decimal TotalIncome, decimal TotalExpense, decimal Net, int TransactionsCount, decimal TotalBalance, string CurrencyCode);
 public sealed record CategoryAnalyticsDto(Guid? CategoryId, decimal Amount);
 public sealed record PremiumComparisonDto(decimal PreviousIncome, decimal CurrentIncome, decimal PreviousExpense, decimal CurrentExpense);
 
 public sealed class AnalyticsService(
     IFinanceDbContext dbContext,
     IAuthService authService,
-    IPremiumAccessService premiumAccessService)
+    IPremiumAccessService premiumAccessService,
+    ICurrencyRateProvider currencyRateProvider,
+    IDashboardCurrencyProvider dashboardCurrencyProvider)
 {
     public async Task<Result<DashboardAnalyticsDto>> GetDashboardAsync(DateTime from, DateTime to, CancellationToken ct = default)
     {
@@ -26,8 +28,37 @@ public sealed class AnalyticsService(
 
         var income = transactions.Where(t => t.Type == TransactionType.Income).Sum(t => t.Amount);
         var expense = transactions.Where(t => t.Type == TransactionType.Expense).Sum(t => t.Amount);
+        var dashboardCurrencyCode = dashboardCurrencyProvider.GetDashboardCurrencyCode();
+        var accounts = dbContext.Accounts
+            .Where(account => account.UserId == userResult.Value.Id && !account.IsArchived)
+            .ToList();
 
-        return Result<DashboardAnalyticsDto>.Success(new DashboardAnalyticsDto(income, expense, income - expense, transactions.Count));
+        decimal totalBalance = 0m;
+
+        foreach (var account in accounts)
+        {
+            var normalizedBalanceResult = await currencyRateProvider.ConvertAsync(
+                account.CurrentBalance,
+                account.CurrencyCode,
+                dashboardCurrencyCode,
+                ct);
+
+            if (normalizedBalanceResult.IsFailure)
+            {
+                return Result<DashboardAnalyticsDto>.Failure(normalizedBalanceResult.Error);
+            }
+
+            totalBalance += normalizedBalanceResult.Value;
+        }
+
+        return Result<DashboardAnalyticsDto>.Success(
+            new DashboardAnalyticsDto(
+                income,
+                expense,
+                income - expense,
+                transactions.Count,
+                decimal.Round(totalBalance, 2, MidpointRounding.AwayFromZero),
+                dashboardCurrencyCode));
     }
 
     public async Task<Result<IReadOnlyCollection<CategoryAnalyticsDto>>> GetExpensesByCategoryAsync(DateTime from, DateTime to, CancellationToken ct = default)

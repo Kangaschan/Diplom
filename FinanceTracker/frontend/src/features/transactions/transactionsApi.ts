@@ -16,9 +16,21 @@ export interface CreateTransactionRequest {
   type: number;
   amount: number;
   currencyCode: string;
+  manualRate?: number | null;
   transactionDate: string;
   description?: string;
   source: number;
+}
+
+export interface UpdateTransactionRequest {
+  id: string;
+  accountId: string;
+  categoryId?: string | null;
+  amount: number;
+  currencyCode: string;
+  manualRate?: number | null;
+  transactionDate: string;
+  description?: string;
 }
 
 export const transactionsApi = api.injectEndpoints({
@@ -38,6 +50,14 @@ export const transactionsApi = api.injectEndpoints({
       }),
       invalidatesTags: ["Transaction", "Account", "Budget", "Analytics"]
     }),
+    updateTransaction: builder.mutation<TransactionDto, UpdateTransactionRequest>({
+      query: ({ id, ...body }) => ({
+        url: `/transactions/${id}`,
+        method: "PUT",
+        body
+      }),
+      invalidatesTags: ["Transaction", "Account", "Budget", "Analytics"]
+    }),
     deleteTransaction: builder.mutation<void, string>({
       query: (id) => ({
         url: `/transactions/${id}`,
@@ -48,4 +68,9 @@ export const transactionsApi = api.injectEndpoints({
   })
 });
 
-export const { useGetTransactionsQuery, useCreateTransactionMutation, useDeleteTransactionMutation } = transactionsApi;
+export const {
+  useGetTransactionsQuery,
+  useCreateTransactionMutation,
+  useUpdateTransactionMutation,
+  useDeleteTransactionMutation
+} = transactionsApi;

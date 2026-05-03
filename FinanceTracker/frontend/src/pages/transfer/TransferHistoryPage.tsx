@@ -1,4 +1,4 @@
-﻿import { Card, Table, Typography } from "antd";
+import { Card, Table, Typography } from "antd";
 
 import { formatDate } from "../../shared/lib/formatDate";
 import { formatMoney } from "../../shared/lib/formatMoney";
@@ -41,7 +41,13 @@ export function TransferHistoryPage() {
             },
             {
               title: "Rate",
-              render: (_, row) => row.estimatedRate ?? "n/a"
+              render: (_, row) => {
+                if (row.manualRate && row.manualRate > 0) {
+                  return `${row.manualRate} (manual)`;
+                }
+
+                return row.estimatedRate ?? "n/a";
+              }
             },
             {
               title: "Description",
