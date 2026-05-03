@@ -22,6 +22,7 @@ public interface IFinanceDbContext
     IQueryable<Budget> Budgets { get; }
     IQueryable<Notification> Notifications { get; }
     IQueryable<Receipt> Receipts { get; }
+    IQueryable<ReceiptItem> ReceiptItems { get; }
     IQueryable<RecurringPayment> RecurringPayments { get; }
     IQueryable<CreditObligation> CreditObligations { get; }
 

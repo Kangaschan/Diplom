@@ -15,6 +15,7 @@ import { BudgetsPage } from "../../pages/budgets/BudgetsPage";
 import { AnalyticsPage } from "../../pages/analytics/AnalyticsPage";
 import { SubscriptionsPage } from "../../pages/subscriptions/SubscriptionsPage";
 import { ProfilePage } from "../../pages/profile/ProfilePage";
+import { ReceiptsPage } from "../../pages/receipts/ReceiptsPage";
 import { PlaceholderPage } from "../../pages/placeholders/PlaceholderPage";
 
 export function AppRouter() {
@@ -37,7 +38,7 @@ export function AppRouter() {
           <Route path="/analytics" element={<AnalyticsPage />} />
           <Route path="/subscriptions" element={<SubscriptionsPage />} />
           <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/receipts" element={<PlaceholderPage title="Receipts" description="OCR module will be implemented in the next milestone." />} />
+          <Route path="/receipts" element={<ReceiptsPage />} />
           <Route path="/export" element={<PlaceholderPage title="Export" description="Export reports UI will be implemented in the next milestone." />} />
         </Route>
       </Route>

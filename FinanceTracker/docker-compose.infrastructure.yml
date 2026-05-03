@@ -51,7 +51,19 @@
       keycloak-db:
         condition: service_healthy
 
+  azurite:
+    image: mcr.microsoft.com/azure-storage/azurite
+    container_name: financetracker-azurite
+    command: "azurite --blobHost 0.0.0.0 --queueHost 0.0.0.0 --tableHost 0.0.0.0"
+    ports:
+      - "10000:10000"
+      - "10001:10001"
+      - "10002:10002"
+    volumes:
+      - azurite_data:/data
+
 
 volumes:
   postgres_data:
   keycloak_postgres_data:
+  azurite_data:

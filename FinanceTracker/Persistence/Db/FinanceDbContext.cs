@@ -24,6 +24,7 @@ public sealed class FinanceDbContext(DbContextOptions<FinanceDbContext> options)
     public DbSet<Budget> BudgetsDb => Set<Budget>();
     public DbSet<Notification> NotificationsDb => Set<Notification>();
     public DbSet<Receipt> ReceiptsDb => Set<Receipt>();
+    public DbSet<ReceiptItem> ReceiptItemsDb => Set<ReceiptItem>();
     public DbSet<RecurringPayment> RecurringPaymentsDb => Set<RecurringPayment>();
     public DbSet<CreditObligation> CreditObligationsDb => Set<CreditObligation>();
 
@@ -36,6 +37,7 @@ public sealed class FinanceDbContext(DbContextOptions<FinanceDbContext> options)
     public IQueryable<Budget> Budgets => BudgetsDb.AsQueryable();
     public IQueryable<Notification> Notifications => NotificationsDb.AsQueryable();
     public IQueryable<Receipt> Receipts => ReceiptsDb.AsQueryable();
+    public IQueryable<ReceiptItem> ReceiptItems => ReceiptItemsDb.AsQueryable();
     public IQueryable<RecurringPayment> RecurringPayments => RecurringPaymentsDb.AsQueryable();
     public IQueryable<CreditObligation> CreditObligations => CreditObligationsDb.AsQueryable();
 
@@ -154,7 +156,24 @@ public sealed class FinanceDbContext(DbContextOptions<FinanceDbContext> options)
             entity.Property(x => x.OcrStatus).HasConversion<int>();
             entity.Property(x => x.RecognizedTotalAmount).HasPrecision(18, 2);
             entity.Property(x => x.RawOcrData).HasColumnType("jsonb");
+            entity.Property(x => x.StorageContainer).HasMaxLength(100).IsRequired();
+            entity.Property(x => x.OriginalFileName).HasMaxLength(255).IsRequired();
+            entity.Property(x => x.ContentType).HasMaxLength(100).IsRequired();
+            entity.Property(x => x.FileUrl).HasMaxLength(1000).IsRequired();
+            entity.Property(x => x.RecognizedMerchant).HasMaxLength(255);
+            entity.Property(x => x.ProcessingError).HasMaxLength(2000);
             entity.HasIndex(x => x.UserId);
+        });
+
+        modelBuilder.Entity<ReceiptItem>(entity =>
+        {
+            entity.ToTable("receipt_items");
+            entity.HasKey(x => x.Id);
+            entity.HasIndex(x => x.ReceiptId);
+            entity.Property(x => x.Name).HasMaxLength(300).IsRequired();
+            entity.Property(x => x.Price).HasPrecision(18, 2);
+            entity.Property(x => x.CurrencyCode).HasMaxLength(3).IsRequired();
+            entity.Property(x => x.CategoryName).HasMaxLength(120).IsRequired();
         });
 
         modelBuilder.Entity<RecurringPayment>(entity =>

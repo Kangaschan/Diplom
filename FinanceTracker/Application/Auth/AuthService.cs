@@ -1,4 +1,6 @@
 using Application.Abstractions;
+using Domain.Categories;
+using Domain.Common;
 using Domain.Users;
 using Shared.Constants;
 using Shared.Errors;
@@ -55,6 +57,7 @@ public sealed class AuthService(
             }
         }
 
+        await EnsureDefaultCategoriesAsync(user, now, ct);
         await dbContext.SaveChangesAsync(ct);
         return Result<User>.Success(user);
     }
@@ -165,6 +168,7 @@ public sealed class AuthService(
             }
         }
 
+        await EnsureDefaultCategoriesAsync(user, now, ct);
         await dbContext.SaveChangesAsync(ct);
         return Result<User>.Success(user);
     }
@@ -265,5 +269,31 @@ public sealed class AuthService(
     private User? ResolveCurrentUserByKeycloakId(string keycloakUserId)
     {
         return dbContext.Users.FirstOrDefault(u => u.KeycloakUserId == keycloakUserId);
+    }
+
+    private async Task EnsureDefaultCategoriesAsync(User user, DateTime now, CancellationToken ct)
+    {
+        var hasOthersExpenseCategory = dbContext.Categories.Any(category =>
+            category.UserId == user.Id
+            && category.Type == CategoryType.Expense
+            && category.Name == "Others");
+
+        if (hasOthersExpenseCategory)
+        {
+            return;
+        }
+
+        var category = new Category
+        {
+            UserId = user.Id,
+            Name = "Others",
+            Type = CategoryType.Expense,
+            IsSystem = false,
+            IsActive = true,
+            CreatedAt = now,
+            UpdatedAt = now
+        };
+
+        await dbContext.AddAsync(category, ct);
     }
 }

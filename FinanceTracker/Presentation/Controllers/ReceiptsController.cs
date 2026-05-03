@@ -1,28 +1,84 @@
-﻿using Application.Receipts;
+using Application.Receipts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.Extensions;
+using Shared.Constants;
 
 namespace Presentation.Controllers;
 
-public sealed record UploadReceiptRequest(string FileUrl, decimal? RecognizedAmount, DateTime? RecognizedDate, string? Merchant);
+[System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1050", Justification = "Local API contract")]
+public sealed record UpdateReceiptItemCategoryRequest(Guid? MappedCategoryId);
+
+[System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1050", Justification = "Local API contract")]
+public sealed class UploadReceiptRequest
+{
+    public IFormFile? File { get; set; }
+}
 
 [ApiController]
 [Route("api/receipts")]
 [Authorize]
-public sealed class ReceiptsController(ReceiptService receiptService) : ControllerBase
+public sealed class ReceiptsController : ControllerBase
 {
+    private readonly ReceiptService _receiptService;
+
+    public ReceiptsController(ReceiptService receiptService)
+    {
+        _receiptService = receiptService;
+    }
+
     [HttpGet]
     public async Task<IActionResult> List(CancellationToken ct)
     {
-        var result = await receiptService.GetListAsync(ct);
+        var result = await _receiptService.GetListAsync(ct);
         return this.ToActionResult(result);
     }
 
-    [HttpPost]
-    public async Task<IActionResult> Upload([FromBody] UploadReceiptRequest request, CancellationToken ct)
+    [HttpGet("{id:guid}")]
+    public async Task<IActionResult> Get(Guid id, CancellationToken ct)
     {
-        var result = await receiptService.UploadAsync(request.FileUrl, request.RecognizedAmount, request.RecognizedDate, request.Merchant, ct);
+        var result = await _receiptService.GetByIdAsync(id, ct);
+        return this.ToActionResult(result);
+    }
+
+    [HttpPost("upload")]
+    [Consumes("multipart/form-data")]
+    [RequestSizeLimit(10 * 1024 * 1024)]
+    public async Task<IActionResult> Upload([FromForm] UploadReceiptRequest request, CancellationToken ct)
+    {
+        var file = request.File;
+        if (file is null)
+        {
+            return this.ToActionResult(Shared.Results.Result.Failure(new Shared.Errors.AppError(ErrorCodes.Validation,"file is missing")));
+        }
+
+        await using var stream = file.OpenReadStream();
+        var result = await _receiptService.UploadAsync(
+            file.FileName,
+            string.IsNullOrWhiteSpace(file.ContentType) ? "application/octet-stream" : file.ContentType,
+            file.Length,
+            stream,
+            ct);
+
+        return this.ToActionResult(result);
+    }
+
+    [HttpGet("{id:guid}/file")]
+    public async Task<IActionResult> FileContent(Guid id, CancellationToken ct)
+    {
+        var result = await _receiptService.OpenFileAsync(id, ct);
+        if (result.IsFailure || result.Value is null)
+        {
+            return this.ToActionResult(result);
+        }
+
+        return File(result.Value.Content, result.Value.ContentType, enableRangeProcessing: true);
+    }
+
+    [HttpPut("items/{itemId:guid}/category")]
+    public async Task<IActionResult> UpdateItemCategory(Guid itemId, [FromBody] UpdateReceiptItemCategoryRequest request, CancellationToken ct)
+    {
+        var result = await _receiptService.UpdateItemCategoryAsync(itemId, request.MappedCategoryId, ct);
         return this.ToActionResult(result);
     }
 }

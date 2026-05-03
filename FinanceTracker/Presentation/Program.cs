@@ -1,5 +1,6 @@
-﻿using Application;
+using Application;
 using Application.Abstractions;
+using Infrastructure.Storage;
 using Identity.Authentication;
 using Identity.Services;
 using Microsoft.AspNetCore.Authentication;
@@ -17,6 +18,7 @@ const string FrontendCorsPolicy = "FrontendCorsPolicy";
 
 builder.Services.AddApplication();
 builder.Services.AddPersistence(builder.Configuration);
+builder.Services.AddInfrastructureStorage(builder.Configuration);
 builder.Services.AddExternalServices(builder.Configuration);
 builder.Services.AddStripeSubscriptions(builder.Configuration);
 builder.Services.AddHttpContextAccessor();

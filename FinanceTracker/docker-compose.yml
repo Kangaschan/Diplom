@@ -48,6 +48,16 @@
       postgres:
         condition: service_healthy
 
+  azurite:
+    image: mcr.microsoft.com/azure-storage/azurite
+    container_name: financetracker-azurite
+    command: "azurite --blobHost 0.0.0.0 --queueHost 0.0.0.0 --tableHost 0.0.0.0"
+    ports:
+      - "10000:10000"
+      - "10001:10001"
+      - "10002:10002"
+    volumes:
+      - azurite_data:/data
 
   app:
     build:
@@ -59,6 +69,8 @@
       Authentication__UseDevelopmentAuth: "false"
       Persistence__UseInMemory: "false"
       ConnectionStrings__Postgres: "Host=postgres;Port=5432;Database=financetracker;Username=postgres;Password=postgres"
+      AzuriteStorage__ConnectionString: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://azurite:10000/devstoreaccount1;QueueEndpoint=http://azurite:10001/devstoreaccount1;TableEndpoint=http://azurite:10002/devstoreaccount1;"
+      AzuriteStorage__ReceiptsContainer: "receipts"
       Keycloak__BaseUrl: "http://keycloak:8080"
       Keycloak__Realm: "financetracker"
       Keycloak__ClientId: "financetracker-web"
@@ -74,7 +86,10 @@
         condition: service_healthy
       keycloak:
         condition: service_started
+      azurite:
+        condition: service_started
 
 volumes:
   postgres_data:
   keycloak_postgres_data:
+  azurite_data:

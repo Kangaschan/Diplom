@@ -78,7 +78,8 @@ export const api = createApi({
     "Notification",
     "Category",
     "Budget",
-    "Analytics"
+    "Analytics",
+    "Receipt"
   ],
   endpoints: () => ({})
 });
