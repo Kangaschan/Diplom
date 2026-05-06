@@ -1,6 +1,7 @@
-import { Avatar, Button, Card, Col, Form, Input, Row, Space, Tag, Typography, message } from "antd";
 import { UserOutlined } from "@ant-design/icons";
+import { Avatar, Button, Card, Col, Form, Input, Row, Space, Tag, Typography, message } from "antd";
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 
 import { useGetProfileQuery, useUpdateProfileMutation } from "../../features/profile/profileApi";
 
@@ -13,6 +14,7 @@ interface ProfileForm {
 }
 
 export function ProfilePage() {
+  const { t } = useTranslation();
   const [form] = Form.useForm<ProfileForm>();
   const [messageApi, contextHolder] = message.useMessage();
 
@@ -35,14 +37,14 @@ export function ProfilePage() {
 
   async function onFinish(values: ProfileForm) {
     await updateProfile(values).unwrap();
-    messageApi.success("Profile updated.");
+    messageApi.success(t("profile.updated"));
   }
 
   return (
     <div className="page-content">
       {contextHolder}
       <Typography.Title level={2} style={{ margin: 0 }}>
-        Profile
+        {t("profile.title")}
       </Typography.Title>
 
       <Row gutter={[16, 16]}>
@@ -51,32 +53,34 @@ export function ProfilePage() {
             <Space direction="vertical" align="center" style={{ width: "100%" }}>
               <Avatar size={96} src={profile?.avatarUrl ?? undefined} icon={<UserOutlined />} />
               <Form form={form} layout="vertical" style={{ width: "100%" }}>
-                <Form.Item name="avatarUrl" label="Avatar URL">
+                <Form.Item name="avatarUrl" label={t("profile.avatarUrl")}>
                   <Input placeholder="https://..." />
                 </Form.Item>
               </Form>
-              <Tag color={profile?.hasActivePremium ? "gold" : "blue"}>{profile?.hasActivePremium ? "Premium" : "Free"}</Tag>
+              <Tag color={profile?.hasActivePremium ? "gold" : "blue"}>
+                {profile?.hasActivePremium ? "Premium" : t("profile.free")}
+              </Tag>
             </Space>
           </Card>
         </Col>
 
         <Col span={16}>
-          <Card title="Personal data" loading={isLoading}>
+          <Card title={t("profile.personalData")} loading={isLoading}>
             <Form form={form} layout="vertical" onFinish={(values) => void onFinish(values)}>
-              <Form.Item name="username" label="Username" rules={[{ required: true }]}>
+              <Form.Item name="username" label={t("profile.username")} rules={[{ required: true }]}>
                 <Input />
               </Form.Item>
-              <Form.Item name="email" label="Email" rules={[{ required: true }]}>
+              <Form.Item name="email" label={t("profile.email")} rules={[{ required: true }]}>
                 <Input />
               </Form.Item>
-              <Form.Item name="firstName" label="First name">
+              <Form.Item name="firstName" label={t("profile.firstName")}>
                 <Input />
               </Form.Item>
-              <Form.Item name="lastName" label="Last name">
+              <Form.Item name="lastName" label={t("profile.lastName")}>
                 <Input />
               </Form.Item>
               <Button type="primary" htmlType="submit" loading={isUpdating}>
-                Save
+                {t("profile.save")}
               </Button>
             </Form>
           </Card>

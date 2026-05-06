@@ -79,7 +79,8 @@ export const api = createApi({
     "Category",
     "Budget",
     "Analytics",
-    "Receipt"
+    "Receipt",
+    "RecurringPayment"
   ],
   endpoints: () => ({})
 });

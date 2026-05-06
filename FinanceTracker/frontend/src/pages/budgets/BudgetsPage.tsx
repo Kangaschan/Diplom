@@ -19,6 +19,7 @@ import {
 } from "antd";
 import dayjs from "dayjs";
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { useGetAccountsQuery } from "../../features/accounts/accountsApi";
 import {
@@ -45,39 +46,6 @@ interface BudgetFormValues {
   endDate: dayjs.Dayjs;
 }
 
-function getBudgetStatusColor(status: BudgetUsageDto["status"]) {
-  switch (status) {
-    case "warning":
-      return "warning";
-    case "exceeded":
-      return "error";
-    default:
-      return "success";
-  }
-}
-
-function getBudgetStatusLabel(status: BudgetUsageDto["status"]) {
-  switch (status) {
-    case "warning":
-      return "Near limit";
-    case "exceeded":
-      return "Exceeded";
-    default:
-      return "Normal";
-  }
-}
-
-function getPeriodLabel(periodType: BudgetPeriodType) {
-  switch (periodType) {
-    case BudgetPeriodType.Weekly:
-      return "Weekly";
-    case BudgetPeriodType.Custom:
-      return "Custom";
-    default:
-      return "Monthly";
-  }
-}
-
 function getSuggestedPeriodRange(periodType: BudgetPeriodType) {
   if (periodType === BudgetPeriodType.Weekly) {
     return {
@@ -100,6 +68,7 @@ function getSuggestedPeriodRange(periodType: BudgetPeriodType) {
 }
 
 export function BudgetsPage() {
+  const { t } = useTranslation();
   const [messageApi, contextHolder] = message.useMessage();
   const [modalOpen, setModalOpen] = useState(false);
   const [editingBudget, setEditingBudget] = useState<BudgetDto | null>(null);
@@ -117,6 +86,39 @@ export function BudgetsPage() {
     () => categories.filter((category) => category.type === 2 && category.isActive !== false),
     [categories]
   );
+
+  function getBudgetStatusColor(status: BudgetUsageDto["status"]) {
+    switch (status) {
+      case "warning":
+        return "warning";
+      case "exceeded":
+        return "error";
+      default:
+        return "success";
+    }
+  }
+
+  function getBudgetStatusLabel(status: BudgetUsageDto["status"]) {
+    switch (status) {
+      case "warning":
+        return t("budgets.statusWarning");
+      case "exceeded":
+        return t("budgets.statusExceeded");
+      default:
+        return t("budgets.statusNormal");
+    }
+  }
+
+  function getPeriodLabel(periodType: BudgetPeriodType) {
+    switch (periodType) {
+      case BudgetPeriodType.Weekly:
+        return t("budgets.periodWeek");
+      case BudgetPeriodType.Custom:
+        return t("budgets.periodCustom");
+      default:
+        return t("budgets.periodMonth");
+    }
+  }
 
   function openCreateModal() {
     const initialRange = getSuggestedPeriodRange(BudgetPeriodType.Monthly);
@@ -155,9 +157,9 @@ export function BudgetsPage() {
   async function handleDelete(id: string) {
     try {
       await deleteBudget(id).unwrap();
-      messageApi.success("Budget deleted.");
+      messageApi.success(t("budgets.deleted"));
     } catch {
-      messageApi.error("Failed to delete budget.");
+      messageApi.error(t("budgets.deleteFailed"));
     }
   }
 
@@ -182,10 +184,10 @@ export function BudgetsPage() {
           startDate: payload.startDate,
           endDate: payload.endDate
         }).unwrap();
-        messageApi.success("Budget updated.");
+        messageApi.success(t("budgets.updated"));
       } else {
         await createBudget(payload).unwrap();
-        messageApi.success("Budget created.");
+        messageApi.success(t("budgets.created"));
       }
 
       closeModal();
@@ -194,7 +196,7 @@ export function BudgetsPage() {
         return;
       }
 
-      messageApi.error("Failed to save budget.");
+      messageApi.error(t("budgets.saveFailed"));
     }
   }
 
@@ -204,24 +206,24 @@ export function BudgetsPage() {
 
       <div className="page-header">
         <Typography.Title level={2} style={{ margin: 0 }}>
-          Budgets
+          {t("budgets.title")}
         </Typography.Title>
         <Button type="primary" onClick={openCreateModal}>
-          New budget
+          {t("budgets.newBudget")}
         </Button>
       </div>
 
       <Typography.Paragraph type="secondary" style={{ margin: 0 }}>
-        Track spending limits by category, monitor progress, and get notified before overspending.
+        {t("budgets.subtitle")}
       </Typography.Paragraph>
 
       <Card>
         {isLoading ? (
           <Skeleton active paragraph={{ rows: 6 }} />
         ) : usage.length === 0 ? (
-          <Empty description="No budgets yet">
+          <Empty description={t("budgets.noBudgets")}>
             <Button type="primary" onClick={openCreateModal}>
-              Create first budget
+              {t("budgets.createFirst")}
             </Button>
           </Empty>
         ) : (
@@ -239,7 +241,7 @@ export function BudgetsPage() {
               };
 
               const editableBudget = budgets.find((budget) => budget.id === item.budgetId) ?? fallbackBudget;
-              const scopeLabel = item.accountName ? `Account: ${item.accountName}` : "All accounts";
+              const scopeLabel = item.accountName ? t("budgets.scopeAccount", { name: item.accountName }) : t("budgets.scopeAllAccounts");
 
               return (
                 <Card key={item.budgetId} size="small">
@@ -255,10 +257,10 @@ export function BudgetsPage() {
                         <Tag color={getBudgetStatusColor(item.status)}>{getBudgetStatusLabel(item.status)}</Tag>
                         <Button type="text" icon={<EditOutlined />} onClick={() => openEditModal(editableBudget)} />
                         <Popconfirm
-                          title="Delete budget?"
-                          description="This action cannot be undone."
-                          okText="Delete"
-                          cancelText="Cancel"
+                          title={t("budgets.deleteTitle")}
+                          description={t("budgets.deleteDescription")}
+                          okText={t("common.delete")}
+                          cancelText={t("common.cancel")}
                           onConfirm={() => void handleDelete(item.budgetId)}
                         >
                           <Button danger type="text" icon={<DeleteOutlined />} loading={isDeleting} />
@@ -272,14 +274,14 @@ export function BudgetsPage() {
                     />
 
                     <Space size={20} wrap>
-                      <Typography.Text>Limit: {formatMoney(item.limitAmount, item.currencyCode)}</Typography.Text>
-                      <Typography.Text>Used: {formatMoney(item.usedAmount, item.currencyCode)}</Typography.Text>
-                      <Typography.Text>Remaining: {formatMoney(item.remainingAmount, item.currencyCode)}</Typography.Text>
+                      <Typography.Text>{t("budgets.limit")}: {formatMoney(item.limitAmount, item.currencyCode)}</Typography.Text>
+                      <Typography.Text>{t("budgets.used")}: {formatMoney(item.usedAmount, item.currencyCode)}</Typography.Text>
+                      <Typography.Text>{t("budgets.remaining")}: {formatMoney(item.remainingAmount, item.currencyCode)}</Typography.Text>
                       <Typography.Text>{Number(item.percentUsed).toFixed(2)}%</Typography.Text>
                     </Space>
 
                     <Typography.Text type="secondary">
-                      Period: {formatDate(item.startDate)} - {formatDate(item.endDate)}
+                      {t("budgets.periodLabel")}: {formatDate(item.startDate)} - {formatDate(item.endDate)}
                     </Typography.Text>
                   </Space>
                 </Card>
@@ -290,13 +292,13 @@ export function BudgetsPage() {
       </Card>
 
       <Modal
-        title={editingBudget ? "Edit budget" : "Create budget"}
+        title={editingBudget ? t("budgets.editTitle") : t("budgets.createTitle")}
         open={modalOpen}
         onCancel={closeModal}
         onOk={() => void handleSubmit()}
         confirmLoading={isCreating || isUpdating}
-        okText={editingBudget ? "Save changes" : "Create budget"}
-        cancelText="Cancel"
+        okText={editingBudget ? t("budgets.saveChanges") : t("budgets.createTitle")}
+        cancelText={t("common.cancel")}
         destroyOnHidden
       >
         <Form
@@ -319,14 +321,10 @@ export function BudgetsPage() {
             }
           }}
         >
-          <Form.Item
-            name="categoryId"
-            label="Category"
-            rules={[{ required: true, message: "Select category" }]}
-          >
+          <Form.Item name="categoryId" label={t("budgets.category")} rules={[{ required: true, message: t("budgets.categoryRequired") }]}>
             <Select
               disabled={Boolean(editingBudget)}
-              placeholder="Select expense category"
+              placeholder={t("budgets.categoryPlaceholder")}
               options={expenseCategories.map((category) => ({
                 value: category.id,
                 label: category.name
@@ -334,11 +332,11 @@ export function BudgetsPage() {
             />
           </Form.Item>
 
-          <Form.Item name="accountId" label="Account">
+          <Form.Item name="accountId" label={t("budgets.account")}>
             <Select
               allowClear
               disabled={Boolean(editingBudget)}
-              placeholder="All accounts"
+              placeholder={t("budgets.allAccounts")}
               options={accounts.map((account) => ({
                 value: account.id,
                 label: `${account.name} (${account.currencyCode})`
@@ -346,54 +344,42 @@ export function BudgetsPage() {
             />
           </Form.Item>
 
-          <Form.Item
-            name="limitAmount"
-            label="Limit amount"
-            rules={[{ required: true, message: "Enter limit amount" }]}
-          >
+          <Form.Item name="limitAmount" label={t("budgets.limitAmount")} rules={[{ required: true, message: t("budgets.limitAmountRequired") }]}>
             <InputNumber style={{ width: "100%" }} precision={2} min={0.01} />
           </Form.Item>
 
           <Form.Item
             name="currencyCode"
-            label="Currency"
+            label={t("budgets.currency")}
             rules={[
-              { required: true, message: "Enter currency" },
-              { len: 3, message: "Use a 3-letter currency code" }
+              { required: true, message: t("budgets.currencyRequired") },
+              { len: 3, message: t("budgets.currencyLength") }
             ]}
           >
             <Input maxLength={3} disabled={Boolean(editingBudget)} />
           </Form.Item>
 
-          <Form.Item
-            name="periodType"
-            label="Period type"
-            rules={[{ required: true, message: "Select period type" }]}
-          >
+          <Form.Item name="periodType" label={t("budgets.periodType")} rules={[{ required: true, message: t("budgets.periodTypeRequired") }]}>
             <Select
               disabled={Boolean(editingBudget)}
               options={[
-                { value: BudgetPeriodType.Monthly, label: "Monthly" },
-                { value: BudgetPeriodType.Weekly, label: "Weekly" },
-                { value: BudgetPeriodType.Custom, label: "Custom" }
+                { value: BudgetPeriodType.Monthly, label: t("budgets.periodMonth") },
+                { value: BudgetPeriodType.Weekly, label: t("budgets.periodWeek") },
+                { value: BudgetPeriodType.Custom, label: t("budgets.periodCustom") }
               ]}
             />
           </Form.Item>
 
-          <Form.Item
-            name="startDate"
-            label="Start date"
-            rules={[{ required: true, message: "Select start date" }]}
-          >
+          <Form.Item name="startDate" label={t("budgets.startDate")} rules={[{ required: true, message: t("budgets.startDateRequired") }]}>
             <DatePicker style={{ width: "100%" }} format="DD.MM.YYYY" />
           </Form.Item>
 
           <Form.Item
             name="endDate"
-            label="End date"
+            label={t("budgets.endDate")}
             dependencies={["startDate"]}
             rules={[
-              { required: true, message: "Select end date" },
+              { required: true, message: t("budgets.endDateRequired") },
               ({ getFieldValue }) => ({
                 validator(_, value: dayjs.Dayjs | undefined) {
                   const startDate = getFieldValue("startDate") as dayjs.Dayjs | undefined;
@@ -402,7 +388,7 @@ export function BudgetsPage() {
                     return Promise.resolve();
                   }
 
-                  return Promise.reject(new Error("End date cannot be earlier than start date"));
+                  return Promise.reject(new Error(t("budgets.endDateError")));
                 }
               })
             ]}

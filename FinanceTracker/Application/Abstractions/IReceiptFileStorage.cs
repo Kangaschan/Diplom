@@ -23,4 +23,9 @@ public interface IReceiptFileStorage
         string containerName,
         string blobName,
         CancellationToken ct = default);
+
+    Task DeleteAsync(
+        string containerName,
+        string blobName,
+        CancellationToken ct = default);
 }

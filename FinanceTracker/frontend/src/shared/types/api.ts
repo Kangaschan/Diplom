@@ -12,7 +12,8 @@ export enum TransactionType {
 export enum TransactionSource {
   Manual = 1,
   Receipt = 2,
-  Transfer = 3
+  Transfer = 3,
+  Recurring = 4
 }
 
 export interface AccountDto {
@@ -48,6 +49,16 @@ export interface CategoryDto {
   isActive?: boolean;
 }
 
+export interface CategoryExpenseStatsDto {
+  categoryId: string;
+  categoryName: string;
+  amount: number;
+  transactionsCount: number;
+  currencyCode: string;
+  from: string;
+  to: string;
+}
+
 export interface NotificationDto {
   id: string;
   type?: string;
@@ -72,7 +83,93 @@ export interface DashboardDto {
   totalIncome?: number;
   totalExpense?: number;
   net?: number;
+  transactionsCount?: number;
   currencyCode?: string;
+}
+
+export interface AnalyticsCategoryDto {
+  categoryId?: string | null;
+  categoryName: string;
+  amount: number;
+  transactionsCount: number;
+  currencyCode: string;
+}
+
+export interface CashFlowPointDto {
+  periodStart: string;
+  label: string;
+  income: number;
+  expense: number;
+  net: number;
+  transactionsCount: number;
+  currencyCode: string;
+}
+
+export interface BalanceHistoryPointDto {
+  pointDate: string;
+  label: string;
+  balance: number;
+  currencyCode: string;
+}
+
+export interface AccountDistributionDto {
+  accountId: string;
+  accountName: string;
+  balance: number;
+  currencyCode: string;
+  sharePercent: number;
+}
+
+export interface PremiumComparisonDto {
+  previousIncome: number;
+  currentIncome: number;
+  previousExpense: number;
+  currentExpense: number;
+  currencyCode: string;
+}
+
+export interface RecurringPaymentDto {
+  id: string;
+  name: string;
+  description?: string | null;
+  accountId?: string | null;
+  accountName?: string | null;
+  categoryId?: string | null;
+  categoryName?: string | null;
+  type: TransactionType;
+  amount: number;
+  currencyCode: string;
+  frequency: string;
+  startDate?: string | null;
+  nextExecutionAt?: string | null;
+  endDate?: string | null;
+  lastExecutedAt?: string | null;
+  isActive: boolean;
+}
+
+export interface RecurringPaymentAnalyticsItemDto {
+  recurringPaymentId: string;
+  name: string;
+  type: TransactionType;
+  frequency: string;
+  isActive: boolean;
+  nextExecutionAt?: string | null;
+  ruleAmount: number;
+  ruleCurrencyCode: string;
+  generatedAmount: number;
+  executionsCount: number;
+  currencyCode: string;
+  accountName?: string | null;
+}
+
+export interface RecurringPaymentsAnalyticsDto {
+  activeRulesCount: number;
+  totalRulesCount: number;
+  generatedTransactionsCount: number;
+  generatedIncome: number;
+  generatedExpense: number;
+  currencyCode: string;
+  items: RecurringPaymentAnalyticsItemDto[];
 }
 
 export enum BudgetPeriodType {

@@ -1,16 +1,18 @@
 import { Card, Table, Typography } from "antd";
+import { useTranslation } from "react-i18next";
 
 import { formatDate } from "../../shared/lib/formatDate";
 import { formatMoney } from "../../shared/lib/formatMoney";
 import { getTransferHistory } from "../../shared/lib/transferHistoryStorage";
 
 export function TransferHistoryPage() {
+  const { t } = useTranslation();
   const data = getTransferHistory();
 
   return (
     <div className="page-content">
       <Typography.Title level={2} style={{ margin: 0 }}>
-        Transfer history
+        {t("transferHistory.title")}
       </Typography.Title>
 
       <Card>
@@ -19,38 +21,38 @@ export function TransferHistoryPage() {
           dataSource={data}
           columns={[
             {
-              title: "Date",
+              title: t("transferHistory.date"),
               dataIndex: "createdAt",
               render: (value: string) => formatDate(value)
             },
             {
-              title: "From",
+              title: t("transferHistory.from"),
               dataIndex: "fromAccountName"
             },
             {
-              title: "To",
+              title: t("transferHistory.to"),
               dataIndex: "toAccountName"
             },
             {
-              title: "Sent",
+              title: t("transferHistory.debited"),
               render: (_, row) => formatMoney(row.amountSent, row.sourceCurrency)
             },
             {
-              title: "Received",
+              title: t("transferHistory.credited"),
               render: (_, row) => formatMoney(row.amountReceived, row.targetCurrency)
             },
             {
-              title: "Rate",
+              title: t("transferHistory.rate"),
               render: (_, row) => {
                 if (row.manualRate && row.manualRate > 0) {
-                  return `${row.manualRate} (manual)`;
+                  return `${row.manualRate} (${t("transferHistory.manualSuffix")})`;
                 }
 
-                return row.estimatedRate ?? "n/a";
+                return row.estimatedRate ?? t("common.notAvailable");
               }
             },
             {
-              title: "Description",
+              title: t("transferHistory.description"),
               dataIndex: "description"
             }
           ]}

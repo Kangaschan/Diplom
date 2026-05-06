@@ -10,6 +10,23 @@ namespace Presentation.Controllers;
 public sealed record UpdateReceiptItemCategoryRequest(Guid? MappedCategoryId);
 
 [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1050", Justification = "Local API contract")]
+public sealed record UpdateReceiptItemRequest(
+    string Name,
+    decimal Price,
+    string CurrencyCode,
+    Guid? MappedCategoryId);
+
+[System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1050", Justification = "Local API contract")]
+public sealed record CreateReceiptItemRequest(
+    string Name,
+    decimal Price,
+    string CurrencyCode,
+    Guid? MappedCategoryId);
+
+[System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1050", Justification = "Local API contract")]
+public sealed record ApplyReceiptRequest(Guid AccountId, DateTime? TransactionDate);
+
+[System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1050", Justification = "Local API contract")]
 public sealed class UploadReceiptRequest
 {
     public IFormFile? File { get; set; }
@@ -75,10 +92,64 @@ public sealed class ReceiptsController : ControllerBase
         return File(result.Value.Content, result.Value.ContentType, enableRangeProcessing: true);
     }
 
+    [HttpPost("{id:guid}/retry")]
+    public async Task<IActionResult> Retry(Guid id, CancellationToken ct)
+    {
+        var result = await _receiptService.RetryAsync(id, ct);
+        return this.ToActionResult(result);
+    }
+
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
+    {
+        var result = await _receiptService.DeleteAsync(id, ct);
+        return this.ToActionResult(result);
+    }
+
+    [HttpPost("{id:guid}/apply")]
+    public async Task<IActionResult> Apply(Guid id, [FromBody] ApplyReceiptRequest request, CancellationToken ct)
+    {
+        var result = await _receiptService.ApplyToAccountAsync(id, request.AccountId, request.TransactionDate, ct);
+        return this.ToActionResult(result);
+    }
+
     [HttpPut("items/{itemId:guid}/category")]
     public async Task<IActionResult> UpdateItemCategory(Guid itemId, [FromBody] UpdateReceiptItemCategoryRequest request, CancellationToken ct)
     {
         var result = await _receiptService.UpdateItemCategoryAsync(itemId, request.MappedCategoryId, ct);
+        return this.ToActionResult(result);
+    }
+
+    [HttpPut("items/{itemId:guid}")]
+    public async Task<IActionResult> UpdateItem(Guid itemId, [FromBody] UpdateReceiptItemRequest request, CancellationToken ct)
+    {
+        var result = await _receiptService.UpdateItemAsync(
+            itemId,
+            request.Name,
+            request.Price,
+            request.CurrencyCode,
+            request.MappedCategoryId,
+            ct);
+        return this.ToActionResult(result);
+    }
+
+    [HttpPost("{id:guid}/items")]
+    public async Task<IActionResult> CreateItem(Guid id, [FromBody] CreateReceiptItemRequest request, CancellationToken ct)
+    {
+        var result = await _receiptService.CreateItemAsync(
+            id,
+            request.Name,
+            request.Price,
+            request.CurrencyCode,
+            request.MappedCategoryId,
+            ct);
+        return this.ToActionResult(result);
+    }
+
+    [HttpDelete("items/{itemId:guid}")]
+    public async Task<IActionResult> DeleteItem(Guid itemId, CancellationToken ct)
+    {
+        var result = await _receiptService.DeleteItemAsync(itemId, ct);
         return this.ToActionResult(result);
     }
 }

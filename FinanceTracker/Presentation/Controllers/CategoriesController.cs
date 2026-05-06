@@ -21,6 +21,13 @@ public sealed class CategoriesController(CategoryService categoryService) : Cont
         return this.ToActionResult(result);
     }
 
+    [HttpGet("expense-stats")]
+    public async Task<IActionResult> ExpenseStats([FromQuery] CategoryStatsPeriod period = CategoryStatsPeriod.Month, CancellationToken ct = default)
+    {
+        var result = await categoryService.GetExpenseStatsAsync(period, ct);
+        return this.ToActionResult(result);
+    }
+
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateCategoryRequest request, CancellationToken ct)
     {

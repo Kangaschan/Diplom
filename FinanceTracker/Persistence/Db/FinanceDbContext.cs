@@ -98,6 +98,7 @@ public sealed class FinanceDbContext(DbContextOptions<FinanceDbContext> options)
             entity.HasIndex(x => x.UserId);
             entity.HasIndex(x => x.AccountId);
             entity.HasIndex(x => x.CategoryId);
+            entity.HasIndex(x => x.RecurringPaymentId);
             entity.HasIndex(x => x.TransactionDate);
             entity.HasIndex(x => new { x.UserId, x.TransactionDate });
             entity.HasIndex(x => new { x.UserId, x.AccountId, x.TransactionDate });
@@ -182,8 +183,12 @@ public sealed class FinanceDbContext(DbContextOptions<FinanceDbContext> options)
             entity.HasKey(x => x.Id);
             entity.Property(x => x.EstimatedAmount).HasPrecision(18, 2);
             entity.Property(x => x.CurrencyCode).HasMaxLength(3).IsRequired();
+            entity.Property(x => x.Description).HasMaxLength(500);
             entity.Property(x => x.Name).HasMaxLength(150).IsRequired();
+            entity.Property(x => x.Type).HasConversion<int>();
             entity.HasIndex(x => x.UserId);
+            entity.HasIndex(x => x.AccountId);
+            entity.HasIndex(x => new { x.UserId, x.IsActive, x.NextExecutionAt });
         });
 
         modelBuilder.Entity<CreditObligation>(entity =>

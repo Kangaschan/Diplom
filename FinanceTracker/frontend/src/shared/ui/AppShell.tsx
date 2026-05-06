@@ -40,10 +40,10 @@ export function AppShell() {
     if (location.pathname.startsWith("/categories")) return "/categories";
     if (location.pathname.startsWith("/budgets")) return "/budgets";
     if (location.pathname.startsWith("/analytics")) return "/analytics";
+    if (location.pathname.startsWith("/recurring-payments")) return "/recurring-payments";
     if (location.pathname.startsWith("/subscriptions")) return "/subscriptions";
     if (location.pathname.startsWith("/profile")) return "/profile";
     if (location.pathname.startsWith("/receipts")) return "/receipts";
-    if (location.pathname.startsWith("/export")) return "/export";
     return "/";
   }, [location.pathname]);
 
@@ -74,10 +74,10 @@ export function AppShell() {
             { key: "/categories", label: <Link to="/categories">{t("nav.categories")}</Link> },
             { key: "/budgets", label: <Link to="/budgets">{t("nav.budgets")}</Link> },
             { key: "/analytics", label: <Link to="/analytics">{t("nav.analytics")}</Link> },
+            { key: "/recurring-payments", label: <Link to="/recurring-payments">{t("nav.recurringPayments")}</Link> },
             { key: "/subscriptions", label: <Link to="/subscriptions">{t("nav.subscriptions")}</Link> },
             { key: "/profile", icon: <UserOutlined />, label: <Link to="/profile">{t("nav.profile")}</Link> },
-            { key: "/receipts", icon: <ReadOutlined />, label: <Link to="/receipts">{t("nav.receipts")}</Link> },
-            { key: "/export", label: <Link to="/export">{t("nav.export")}</Link> }
+            { key: "/receipts", icon: <ReadOutlined />, label: <Link to="/receipts">{t("nav.receipts")}</Link> }
           ]}
         />
       </Sider>
@@ -85,7 +85,7 @@ export function AppShell() {
       <Layout>
         <Header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingInline: 20, background: headerBg, borderBottom: theme === "dark" ? "1px solid #13ae87" : "1px solid #d9c8a7" }}>
           <Typography.Text strong style={{ color: headerText }}>
-            {me?.username ? `Hello, ${me.username}` : "Personal Finance Hub"}
+            {me?.username ? t("appShell.greeting", { username: me.username }) : t("appShell.fallbackTitle")}
           </Typography.Text>
 
           <Space>
@@ -102,7 +102,12 @@ export function AppShell() {
               ]}
             />
 
-            <Switch checked={theme === "dark"} onChange={() => dispatch(toggleTheme())} checkedChildren="Dark" unCheckedChildren="Light" />
+            <Switch
+              checked={theme === "dark"}
+              onChange={() => dispatch(toggleTheme())}
+              checkedChildren={t("appShell.themeDark")}
+              unCheckedChildren={t("appShell.themeLight")}
+            />
 
             <Badge count={unreadLoading ? 0 : unreadCount}>
               <Button shape="circle" icon={<BellOutlined />} onClick={() => setNotificationsOpen(true)} />
@@ -115,7 +120,7 @@ export function AppShell() {
                 navigate("/login");
               }}
             >
-              Logout
+              {t("appShell.logout")}
             </Button>
           </Space>
         </Header>
@@ -126,10 +131,10 @@ export function AppShell() {
       </Layout>
 
       <Drawer
-        title="Notifications"
+        title={t("appShell.notifications")}
         open={notificationsOpen}
         onClose={() => setNotificationsOpen(false)}
-        extra={<Button onClick={() => void markAllRead()}>Mark all read</Button>}
+        extra={<Button onClick={() => void markAllRead()}>{t("appShell.markAllRead")}</Button>}
       >
         {notificationsLoading ? (
           <Skeleton active paragraph={{ rows: 5 }} />
@@ -142,7 +147,7 @@ export function AppShell() {
                 <Typography.Text type="secondary">{formatDate(item.createdAt)}</Typography.Text>
               </div>
             ))}
-            {notifications.length === 0 && <Typography.Text type="secondary">No notifications.</Typography.Text>}
+            {notifications.length === 0 && <Typography.Text type="secondary">{t("appShell.noNotifications")}</Typography.Text>}
           </Space>
         )}
       </Drawer>

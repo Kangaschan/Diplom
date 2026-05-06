@@ -31,6 +31,7 @@ public static class DependencyInjection
         services.AddScoped<NotificationService>();
         services.AddScoped<AnalyticsService>();
         services.AddScoped<ReceiptService>();
+        services.AddScoped<ReceiptProcessingService>();
         services.AddScoped<ExportService>();
         services.AddScoped<RecurringPaymentService>();
         services.AddScoped<CreditObligationService>();

@@ -16,7 +16,7 @@ import { AnalyticsPage } from "../../pages/analytics/AnalyticsPage";
 import { SubscriptionsPage } from "../../pages/subscriptions/SubscriptionsPage";
 import { ProfilePage } from "../../pages/profile/ProfilePage";
 import { ReceiptsPage } from "../../pages/receipts/ReceiptsPage";
-import { PlaceholderPage } from "../../pages/placeholders/PlaceholderPage";
+import { RecurringPaymentsPage } from "../../pages/recurring-payments/RecurringPaymentsPage";
 
 export function AppRouter() {
   return (
@@ -36,10 +36,10 @@ export function AppRouter() {
           <Route path="/categories" element={<CategoriesPage />} />
           <Route path="/budgets" element={<BudgetsPage />} />
           <Route path="/analytics" element={<AnalyticsPage />} />
+          <Route path="/recurring-payments" element={<RecurringPaymentsPage />} />
           <Route path="/subscriptions" element={<SubscriptionsPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/receipts" element={<ReceiptsPage />} />
-          <Route path="/export" element={<PlaceholderPage title="Export" description="Export reports UI will be implemented in the next milestone." />} />
         </Route>
       </Route>
 

@@ -1,5 +1,6 @@
 import { Alert, Button, Card, Col, Form, Input, InputNumber, Row, Select, Space, Typography, message } from "antd";
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { useGetAccountsQuery, useTransferMutation } from "../../features/accounts/accountsApi";
 import { getExchangeRate } from "../../shared/lib/exchangeRate";
@@ -16,6 +17,7 @@ interface TransferForm {
 }
 
 export function TransferPage() {
+  const { t } = useTranslation();
   const [form] = Form.useForm<TransferForm>();
   const [messageApi, contextHolder] = message.useMessage();
   const [transfer, { isLoading }] = useTransferMutation();
@@ -130,7 +132,7 @@ export function TransferPage() {
       }
     });
 
-    messageApi.success("Transfer completed.");
+    messageApi.success(t("transfer.success"));
     form.resetFields();
   }
 
@@ -139,14 +141,14 @@ export function TransferPage() {
       {contextHolder}
 
       <Typography.Title level={2} style={{ margin: 0 }}>
-        Transfer with currency conversion
+        {t("transfer.title")}
       </Typography.Title>
 
       <Row gutter={[16, 16]}>
         <Col span={14}>
           <Card loading={accountsLoading}>
             <Form form={form} layout="vertical" onFinish={(data) => void onFinish(data)}>
-              <Form.Item name="fromAccountId" label="From account" rules={[{ required: true }]}>
+              <Form.Item name="fromAccountId" label={t("transfer.fromAccount")} rules={[{ required: true }]}>
                 <Select
                   options={accounts.map((account) => ({
                     label: `${account.name} (${account.currencyCode}) - ${formatMoney(account.currentBalance, account.currencyCode)}`,
@@ -155,7 +157,7 @@ export function TransferPage() {
                 />
               </Form.Item>
 
-              <Form.Item name="toAccountId" label="To account" rules={[{ required: true }]}>
+              <Form.Item name="toAccountId" label={t("transfer.toAccount")} rules={[{ required: true }]}>
                 <Select
                   options={accounts.map((account) => ({
                     label: `${account.name} (${account.currencyCode}) - ${formatMoney(account.currentBalance, account.currencyCode)}`,
@@ -164,14 +166,14 @@ export function TransferPage() {
                 />
               </Form.Item>
 
-              <Form.Item name="amount" label="Amount" rules={[{ required: true }]}>
+              <Form.Item name="amount" label={t("transfer.amount")} rules={[{ required: true }]}>
                 <InputNumber style={{ width: "100%" }} min={0.01} precision={2} />
               </Form.Item>
 
               <Form.Item
                 name="manualRate"
-                label="Manual exchange rate"
-                extra="Optional. Leave empty to use the current exchange rate automatically."
+                label={t("transfer.manualRate")}
+                extra={t("transfer.manualRateExtra")}
                 rules={[
                   {
                     validator(_, value: number | undefined) {
@@ -179,51 +181,46 @@ export function TransferPage() {
                         return Promise.resolve();
                       }
 
-                      return Promise.reject(new Error("Manual rate must be greater than zero"));
+                      return Promise.reject(new Error(t("transfer.manualRateError")));
                     }
                   }
                 ]}
               >
-                <InputNumber style={{ width: "100%" }} min={0.000001} precision={6} placeholder="For example: 4" />
+                <InputNumber style={{ width: "100%" }} min={0.000001} precision={6} placeholder={t("transfer.manualRatePlaceholder")} />
               </Form.Item>
 
-              <Form.Item name="description" label="Description">
-                <Input placeholder="Optional transfer note" />
+              <Form.Item name="description" label={t("transfer.description")}>
+                <Input placeholder={t("transfer.descriptionPlaceholder")} />
               </Form.Item>
 
               <Button type="primary" htmlType="submit" loading={isLoading}>
-                Confirm transfer
+                {t("transfer.submit")}
               </Button>
             </Form>
           </Card>
         </Col>
 
         <Col span={10}>
-          <Card title="Preview before confirm">
+          <Card title={t("transfer.previewTitle")}>
             <Space direction="vertical" style={{ width: "100%" }}>
-              <Typography.Text>Source currency: {from?.currencyCode ?? "-"}</Typography.Text>
-              <Typography.Text>Target currency: {to?.currencyCode ?? "-"}</Typography.Text>
-              <Typography.Text>
-                Auto rate: {rateLoading ? "Loading..." : rate ?? "n/a"}
-              </Typography.Text>
-              <Typography.Text>
-                Applied rate: {effectiveRate ?? "n/a"}
-              </Typography.Text>
+              <Typography.Text>{t("transfer.debitCurrency")}: {from?.currencyCode ?? "-"}</Typography.Text>
+              <Typography.Text>{t("transfer.creditCurrency")}: {to?.currencyCode ?? "-"}</Typography.Text>
+              <Typography.Text>{t("transfer.autoRate")}: {rateLoading ? t("common.loading") : rate ?? t("common.notAvailable")}</Typography.Text>
+              <Typography.Text>{t("transfer.appliedRate")}: {effectiveRate ?? t("common.notAvailable")}</Typography.Text>
               <Typography.Text type="secondary">
-                {values?.manualRate && values.manualRate > 0
-                  ? "Manual rate is enabled for this transfer."
-                  : "Current exchange rate will be used automatically."}
+                {values?.manualRate && values.manualRate > 0 ? t("transfer.manualApplied") : t("transfer.autoApplied")}
               </Typography.Text>
               <Typography.Text strong>
-                Estimated receive amount: {estimatedReceive === null || !to ? "n/a" : formatMoney(estimatedReceive, to.currencyCode)}
+                {t("transfer.estimatedReceive")}:{" "}
+                {estimatedReceive === null || !to ? t("common.notAvailable") : formatMoney(estimatedReceive, to.currencyCode)}
               </Typography.Text>
 
               {!rate && from && to && !values?.manualRate && (
                 <Alert
                   type="warning"
                   showIcon
-                  message="Rate preview unavailable"
-                  description="Transfer still works: backend will apply the final conversion using cached rates."
+                  message={t("transfer.previewUnavailableTitle")}
+                  description={t("transfer.previewUnavailableDescription")}
                 />
               )}
             </Space>

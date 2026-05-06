@@ -80,4 +80,21 @@ public sealed class AzuriteReceiptFileStorage : IReceiptFileStorage
             return null;
         }
     }
+
+    public async Task DeleteAsync(
+        string containerName,
+        string blobName,
+        CancellationToken ct = default)
+    {
+        var containerClient = _blobServiceClient.GetBlobContainerClient(containerName);
+        var blobClient = containerClient.GetBlobClient(blobName);
+
+        try
+        {
+            await blobClient.DeleteIfExistsAsync(cancellationToken: ct);
+        }
+        catch (RequestFailedException ex) when (ex.Status == 404)
+        {
+        }
+    }
 }

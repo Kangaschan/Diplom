@@ -367,6 +367,9 @@ namespace Persistence.Migrations
                     b.Property<Guid?>("CategoryId")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid?>("AccountId")
+                        .HasColumnType("uuid");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -378,6 +381,13 @@ namespace Persistence.Migrations
                     b.Property<decimal>("EstimatedAmount")
                         .HasPrecision(18, 2)
                         .HasColumnType("numeric(18,2)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<DateTime?>("EndDate")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Frequency")
                         .IsRequired()
@@ -394,6 +404,15 @@ namespace Persistence.Migrations
                         .HasMaxLength(150)
                         .HasColumnType("character varying(150)");
 
+                    b.Property<DateTime?>("NextExecutionAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("StartDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("integer");
+
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -402,7 +421,11 @@ namespace Persistence.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("AccountId");
+
                     b.HasIndex("UserId");
+
+                    b.HasIndex("UserId", "IsActive", "NextExecutionAt");
 
                     b.ToTable("recurring_payments", (string)null);
                 });
@@ -464,6 +487,9 @@ namespace Persistence.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<Guid?>("RecurringPaymentId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("CurrencyCode")
                         .IsRequired()
                         .HasMaxLength(3)
@@ -496,6 +522,8 @@ namespace Persistence.Migrations
                     b.HasIndex("AccountId");
 
                     b.HasIndex("CategoryId");
+
+                    b.HasIndex("RecurringPaymentId");
 
                     b.HasIndex("TransactionDate");
 

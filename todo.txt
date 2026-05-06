@@ -1,14 +1,22 @@
-
-notifications
-light theme
 subscriptions
 parseing
 analytics
-ui improvements
+notifications
+light theme
+автоданные при создании транзакций
+тип валюты как список присоздании счета
+ui improvements(русский язык)
 exchange rates
 enhance design(вид надписей в рамке(категория, аккаунт)) белый цвет при выборе в дроп меню
 enhance russian
 
 all done
 
+множественное удаление 
+
 split front + back
+
+
+auth key MDE5ZGVmMTMtYjY3OC03NjdiLWE4NWQtZmNmOGZjYjI1N2RmOjUwOGYzOThmLTMzODEtNDRkNS05NmQyLTFiNDBmZmZiZWJlZg==
+client secret 508f398f-3381-44d5-96d2-1b40fffbebef
+client Id 019def13-b678-767b-a85d-fcf8fcb257df
