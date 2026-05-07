@@ -18,12 +18,12 @@ const lightTheme: ThemeConfig = {
     Layout: {
       bodyBg: "#f4e9d4",
       headerBg: "#f4e9d4",
-      siderBg: "#f4e9d4"
+      siderBg: "#e4d4b6"
     },
     Menu: {
-      itemBg: "#f4e9d4",
+      itemBg: "#e4d4b6",
       itemColor: "#000000",
-      itemHoverBg: "#e9e0cf",
+      itemHoverBg: "#d8c5a0",
       itemHoverColor: "#000000",
       itemSelectedBg: "#d8e5ee",
       itemSelectedColor: "#326586",
@@ -53,12 +53,12 @@ const darkTheme: ThemeConfig = {
     Layout: {
       bodyBg: "#042d22",
       headerBg: "#042d22",
-      siderBg: "#042d22"
+      siderBg: "#0d4132"
     },
     Menu: {
-      darkItemBg: "#042d22",
+      darkItemBg: "#0d4132",
       darkItemColor: "#e6ff55",
-      darkItemHoverBg: "#0b4737",
+      darkItemHoverBg: "#13614b",
       darkItemHoverColor: "#e6ff55",
       darkItemSelectedBg: "#e6ff55",
       darkItemSelectedColor: "#000000",

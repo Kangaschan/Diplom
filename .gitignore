@@ -97,6 +97,8 @@ FinanceTracker/frontend/.env
 FinanceTracker/frontend/.env.*
 !FinanceTracker/frontend/.env.example
 
+Чеки/
+
 # логи фронта
 FinanceTracker/frontend/npm-debug.log*
 FinanceTracker/frontend/yarn-debug.log*

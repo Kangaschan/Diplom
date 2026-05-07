@@ -49,11 +49,11 @@ export function AppShell() {
 
   const headerBg = theme === "dark" ? "#042d22" : "#f4e9d4";
   const headerText = theme === "dark" ? "#e6ff55" : "#000000";
-  const siderBg = theme === "dark" ? "#042d22" : "#f4e9d4";
+  const siderBg = theme === "dark" ? "#0d4132" : "#e4d4b6";
 
   return (
     <Layout style={{ minHeight: "100vh" }}>
-      <Sider width={250} theme={theme === "dark" ? "dark" : "light"} style={{ background: siderBg }}>
+      <Sider width={250} className="ft-app-sider" theme={theme === "dark" ? "dark" : "light"} style={{ background: siderBg }}>
         <div style={{ padding: 20 }}>
           <Typography.Title level={4} style={{ margin: 0, color: theme === "dark" ? "#e6ff55" : "#000000" }}>
             FinanceTracker

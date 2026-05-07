@@ -136,38 +136,42 @@ export function SubscriptionsPage() {
 
         <Row gutter={[16, 16]}>
           <Col xs={24} xl={12}>
-            <Card title={t("subscription.freeCardTitle")} extra={<CheckCircleOutlined style={{ color: "#13ae87" }} />}>
+            <Card
+              className={subscription.typeKey === "free" ? "ft-subscription-card ft-subscription-card--current" : "ft-subscription-card"}
+              title={t("subscription.freeCardTitle")}
+              extra={<CheckCircleOutlined style={{ color: "#13ae87" }} />}
+            >
               <Space direction="vertical">
+                {subscription.typeKey === "free" && <Tag className="ft-current-plan-badge ft-current-plan-badge--top">{t("subscription.currentPlanBadge")}</Tag>}
                 <Typography.Text>{t("subscription.freeFeature1")}</Typography.Text>
                 <Typography.Text>{t("subscription.freeFeature2")}</Typography.Text>
                 <Typography.Text>{t("subscription.freeFeature3")}</Typography.Text>
-                {subscription.typeKey === "free" && <Tag className="ft-current-plan-badge">{t("subscription.currentPlanBadge")}</Tag>}
               </Space>
             </Card>
           </Col>
 
           <Col xs={24} xl={12}>
             <Card
+              className={premiumActive ? "ft-subscription-card ft-subscription-card--current" : "ft-subscription-card"}
               title={t("subscription.premiumCardTitle")}
               extra={premiumActive ? <CrownOutlined style={{ color: "#faad14" }} /> : <LockOutlined />}
             >
               <Space direction="vertical" style={{ width: "100%" }}>
+                {premiumActive && <Tag className="ft-current-plan-badge ft-current-plan-badge--top">{t("subscription.currentPlanBadge")}</Tag>}
                 <Typography.Text>{t("subscription.premiumFeature1")}</Typography.Text>
                 <Typography.Text>{t("subscription.premiumFeature2")}</Typography.Text>
                 <Typography.Text>{t("subscription.premiumFeature3")}</Typography.Text>
-                <Typography.Text>{t("subscription.premiumFeature4")}</Typography.Text>
                 <Typography.Text type="secondary">
-                  {monthlyPrice?.name ?? t("subscription.monthlyPlan")}
-                  {monthlyPrice?.durationDays ? ` • ${monthlyPrice.durationDays} ${t("subscription.durationDays")}` : ""}
+                  {t("subscription.monthlyPlan")}
+                  {monthlyPrice?.durationDays ? ` - ${monthlyPrice.durationDays} ${t("subscription.durationDays")}` : ""}
                 </Typography.Text>
-                {premiumActive && <Tag className="ft-current-plan-badge">{t("subscription.currentPlanBadge")}</Tag>}
 
                 {premiumActive ? (
-                  <Button type="default" onClick={() => void handlePortal()} loading={portalLoading}>
+                  <Button className="ft-subscription-action" type="default" onClick={() => void handlePortal()} loading={portalLoading}>
                     {t("subscription.manage")}
                   </Button>
                 ) : (
-                  <Button type="primary" onClick={() => void handleUpgrade()} loading={checkoutLoading || plansLoading}>
+                  <Button className="ft-subscription-action" type="primary" onClick={() => void handleUpgrade()} loading={checkoutLoading || plansLoading}>
                     {t("subscription.upgrade")}
                   </Button>
                 )}
@@ -179,3 +183,4 @@ export function SubscriptionsPage() {
     </div>
   );
 }
+
