@@ -263,8 +263,13 @@ public sealed class ExportService
                     break;
                 }
 
-                result[current] ??= new List<CalendarRecurringItem>();
-                result[current].Add(new CalendarRecurringItem(rule.Name, rule.Type, rule.EstimatedAmount, rule.CurrencyCode));
+                if (!result.TryGetValue(current, out var itemsForDate))
+                {
+                    itemsForDate = new List<CalendarRecurringItem>();
+                    result[current] = itemsForDate;
+                }
+
+                itemsForDate.Add(new CalendarRecurringItem(rule.Name, rule.Type, rule.EstimatedAmount, rule.CurrencyCode));
                 current = Advance(current, rule.Frequency);
             }
         }
