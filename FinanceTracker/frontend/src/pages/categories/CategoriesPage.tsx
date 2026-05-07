@@ -147,7 +147,7 @@ export function CategoriesPage() {
                       <Progress
                         percent={maxExpenseAmount > 0 ? Number(((item.amount / maxExpenseAmount) * 100).toFixed(0)) : 0}
                         showInfo={false}
-                        strokeColor="#326586"
+                        strokeColor="#264f43"
                       />
                       <Typography.Text type="secondary">{t("categories.operationsCount", { count: item.transactionsCount })}</Typography.Text>
                     </Space>

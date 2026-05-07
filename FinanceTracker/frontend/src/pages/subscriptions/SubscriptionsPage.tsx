@@ -139,7 +139,7 @@ export function SubscriptionsPage() {
             <Card
               className={subscription.typeKey === "free" ? "ft-subscription-card ft-subscription-card--current" : "ft-subscription-card"}
               title={t("subscription.freeCardTitle")}
-              extra={<CheckCircleOutlined style={{ color: "#13ae87" }} />}
+              extra={<CheckCircleOutlined style={{ color: "#0a7c5f" }} />}
             >
               <Space direction="vertical">
                 {subscription.typeKey === "free" && <Tag className="ft-current-plan-badge ft-current-plan-badge--top">{t("subscription.currentPlanBadge")}</Tag>}
@@ -183,4 +183,3 @@ export function SubscriptionsPage() {
     </div>
   );
 }
-

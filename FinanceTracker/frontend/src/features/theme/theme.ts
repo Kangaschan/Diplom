@@ -3,31 +3,49 @@ import type { ThemeMode } from "./uiSlice";
 
 const lightTheme: ThemeConfig = {
   token: {
-    colorPrimary: "#326586",
-    colorInfo: "#326586",
-    colorSuccess: "#13ae87",
-    colorLink: "#433bff",
-    colorLinkHover: "#5a54ff",
-    colorBgBase: "#f4e9d4",
-    colorTextBase: "#000000",
-    colorBorder: "#d9c8a7",
+    colorPrimary: "#264f43",
+    colorInfo: "#264f43",
+    colorSuccess: "#0a7c5f",
+    colorLink: "#264f43",
+    colorLinkHover: "#0a7c5f",
+    colorBgBase: "#edece0",
+    colorBgContainer: "#ffffff",
+    colorBgElevated: "#ffffff",
+    colorTextBase: "#050315",
+    colorTextLightSolid: "#ffffff",
+    colorBorder: "#d1d4c4",
+    colorSplit: "#d1d4c4",
     borderRadius: 10,
     fontFamily: "Manrope, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif"
   },
   components: {
     Layout: {
-      bodyBg: "#f4e9d4",
-      headerBg: "#f4e9d4",
-      siderBg: "#e4d4b6"
+      bodyBg: "#edece0",
+      headerBg: "#edece0",
+      siderBg: "#dddbce"
     },
     Menu: {
-      itemBg: "#e4d4b6",
-      itemColor: "#000000",
-      itemHoverBg: "#d8c5a0",
-      itemHoverColor: "#000000",
-      itemSelectedBg: "#d8e5ee",
-      itemSelectedColor: "#326586",
-      itemActiveBg: "#d8e5ee"
+      itemBg: "#dddbce",
+      itemColor: "#050315",
+      itemHoverBg: "#d2d4c4",
+      itemHoverColor: "#050315",
+      itemSelectedBg: "#264f43",
+      itemSelectedColor: "#ffffff",
+      itemActiveBg: "#264f43"
+    },
+    Button: {
+      primaryColor: "#ffffff",
+      primaryShadow: "none"
+    },
+    Card: {
+      colorBgContainer: "#ffffff",
+      colorBorderSecondary: "#d1d4c4",
+      headerBg: "#ffffff"
+    },
+    Segmented: {
+      trackBg: "#d8ddcf",
+      itemSelectedBg: "#264f43",
+      itemSelectedColor: "#ffffff"
     }
   }
 };

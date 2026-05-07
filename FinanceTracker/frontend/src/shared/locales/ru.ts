@@ -485,7 +485,7 @@ export const ru = {
     statusProcessing: "Обработка"
   },
   subscription: {
-    title: "Подписки",
+    title: "Подписка",
     subtitle: "Управляйте текущим тарифом и доступом к premium-возможностям.",
     currentPlan: "Текущий план",
     currentStatus: "Статус",

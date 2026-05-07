@@ -69,7 +69,7 @@ type DailyExpenseSnapshot = {
   hasMixedCurrencies: boolean
 }
 
-const PIE_COLORS = ["#326586", "#13ae87", "#433bff", "#ff8a3d", "#d9485f", "#7e57c2", "#00a7c4", "#889b00"]
+const PIE_COLORS = ["#264f43", "#0a7c5f", "#6f8f86", "#8ea69d", "#c06b5b", "#7b6f97", "#3e6b7b", "#a08f5b"]
 
 function formatDeltaPercent(current: number, previous: number) {
   if (previous === 0) {
@@ -908,7 +908,7 @@ export function AnalyticsPage() {
                           </Typography.Text>
                         </div>
                       </div>
-                      <Tag color={budget.status === "exceeded" ? "error" : budget.status === "warning" ? "warning" : "success"}>
+                      <Tag className="analytics-budget-status-tag" color={budget.status === "exceeded" ? "error" : budget.status === "warning" ? "warning" : "success"}>
                         {budget.status}
                       </Tag>
                     </div>
